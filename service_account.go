@@ -490,7 +490,7 @@ func (as *apiService) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
 		params["recvWindow"] = strconv.FormatInt(recvWindow(hr.RecvWindow), 10)
 	}
 
-	res, err := as.request("POST", "wapi/v1/getDepositHistory.html", params, true, true)
+	res, err := as.request("POST", "wapi/v3/getDepositHistory.html", params, true, true)
 	if err != nil {
 		return nil, err
 	}
@@ -510,6 +510,8 @@ func (as *apiService) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
 			Amount     float64 `json:"amount"`
 			Asset      string  `json:"asset"`
 			Status     int     `json:"status"`
+			Address    *string `json:"address"`
+			TxID       *string `json:"txId"`
 		}
 		Success bool `json:"success"`
 	}{}
@@ -528,6 +530,8 @@ func (as *apiService) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
 			Amount:     d.Amount,
 			Asset:      d.Asset,
 			Status:     d.Status,
+			Address:    d.Address,
+			TxID:       d.TxID,
 		})
 	}
 

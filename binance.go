@@ -465,6 +465,8 @@ type Deposit struct {
 	Amount     float64
 	Asset      string
 	Status     int
+	Address    *string
+	TxID       *string
 }
 
 // DepositHistory lists deposit data.
