@@ -569,6 +569,10 @@ func (as *apiService) DepositAddress(ar AddressRequest) (*Address, error) {
 		return nil, errors.Wrap(err, "address unmarshal failed")
 	}
 
+	if !address.Success {
+		return nil, errors.New(address.Msg)
+	}
+
 	return &address, nil
 }
 

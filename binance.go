@@ -489,6 +489,7 @@ type Address struct {
 	Amount     float64 `json:"amount"`
 	AddressTag string  `json:"addressTag"`
 	Success    bool    `json:"success"`
+	Msg        string  `json:"msg,omitempty"`
 }
 
 // DepositAddress lists deposit data.
