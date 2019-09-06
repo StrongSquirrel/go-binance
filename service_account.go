@@ -471,6 +471,7 @@ func (as *apiService) Withdraw(wr WithdrawRequest) (*WithdrawResult, error) {
 		Success: rawResult.Success,
 	}, nil
 }
+
 func (as *apiService) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
 	params := make(map[string]string)
 	params["timestamp"] = strconv.FormatInt(unixMillis(hr.Timestamp), 10)
@@ -537,6 +538,40 @@ func (as *apiService) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
 
 	return dc, nil
 }
+
+func (as *apiService) DepositAddress(ar AddressRequest) (*Address, error) {
+	params := make(map[string]string)
+	params["timestamp"] = strconv.FormatInt(unixMillis(ar.Timestamp), 10)
+	params["asset"] = ar.Asset
+	if ar.Status != nil {
+		params["status"] = strconv.Itoa(*ar.Status)
+	}
+	if ar.RecvWindow != 0 {
+		params["recvWindow"] = strconv.FormatInt(recvWindow(ar.RecvWindow), 10)
+	}
+
+	res, err := as.request("GET", "wapi/v3/depositAddress.html", params, true, true)
+	if err != nil {
+		return nil, err
+	}
+	textRes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to read response from depositAddress.get")
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return nil, as.handleError(textRes)
+	}
+
+	address := Address{}
+	if err := json.Unmarshal(textRes, &address); err != nil {
+		return nil, errors.Wrap(err, "address unmarshal failed")
+	}
+
+	return &address, nil
+}
+
 func (as *apiService) WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error) {
 	params := make(map[string]string)
 	params["timestamp"] = strconv.FormatInt(unixMillis(hr.Timestamp), 10)

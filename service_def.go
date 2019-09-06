@@ -36,6 +36,7 @@ type Service interface {
 	MyTrades(mtr MyTradesRequest) ([]*Trade, error)
 	Withdraw(wr WithdrawRequest) (*WithdrawResult, error)
 	DepositHistory(hr HistoryRequest) ([]*Deposit, error)
+	DepositAddress(ar AddressRequest) (*Address, error)
 	WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error)
 
 	StartUserDataStream() (*Stream, error)
