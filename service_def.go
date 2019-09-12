@@ -38,6 +38,7 @@ type Service interface {
 	DepositHistory(hr HistoryRequest) ([]*Deposit, error)
 	DepositAddress(ar AddressRequest) (*Address, error)
 	WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error)
+	TradeFee(tfr TradeFeeRequest) (*TradeFee, error)
 
 	StartUserDataStream() (*Stream, error)
 	KeepAliveUserDataStream(s *Stream) error

@@ -643,6 +643,43 @@ func (as *apiService) WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error) 
 	return wc, nil
 }
 
+func (as *apiService) TradeFee(tfr TradeFeeRequest) (*TradeFee, error) {
+	params := make(map[string]string)
+	params["timestamp"] = strconv.FormatInt(unixMillis(tfr.Timestamp), 10)
+
+	if len(tfr.Symbol) > 0 {
+		params["symbol"] = tfr.Symbol
+	}
+	if tfr.RecvWindow != 0 {
+		params["recvWindow"] = strconv.FormatInt(recvWindow(tfr.RecvWindow), 10)
+	}
+
+	res, err := as.request("GET", "wapi/v3/tradeFee.html", params, true, true)
+	if err != nil {
+		return nil, err
+	}
+	textRes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to read response from tradeFee.get")
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return nil, as.handleError(textRes)
+	}
+
+	tradeFee := TradeFee{}
+	if err := json.Unmarshal(textRes, &tradeFee); err != nil {
+		return nil, errors.Wrap(err, "tradeFee unmarshal failed")
+	}
+
+	if !tradeFee.Success {
+		return nil, errors.New(tradeFee.Msg)
+	}
+
+	return &tradeFee, nil
+}
+
 func executedOrderFromRaw(reo *rawExecutedOrder) (*ExecutedOrder, error) {
 	price, err := strconv.ParseFloat(reo.Price, 64)
 	if err != nil {

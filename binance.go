@@ -56,6 +56,8 @@ type Binance interface {
 	DepositAddress(ar AddressRequest) (*Address, error)
 	// WithdrawHistory lists withdraw data.
 	WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error)
+	// TradeFee lists of fees.
+	TradeFee(tfr TradeFeeRequest) (*TradeFee, error)
 
 	// StartUserDataStream starts stream and returns Stream with ListenKey.
 	StartUserDataStream() (*Stream, error)
@@ -461,6 +463,13 @@ type HistoryRequest struct {
 	Timestamp  time.Time
 }
 
+// TradeFeeRequest represents history-related calls request data.
+type TradeFeeRequest struct {
+	Symbol     string
+	RecvWindow time.Duration
+	Timestamp  time.Time
+}
+
 // Deposit represents Deposit data.
 type Deposit struct {
 	InsertTime time.Time
@@ -476,6 +485,7 @@ func (b *binance) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
 	return b.Service.DepositHistory(hr)
 }
 
+// AddressRequest ...
 type AddressRequest struct {
 	Asset      string
 	Status     *int
@@ -510,6 +520,25 @@ type Withdrawal struct {
 // WithdrawHistory lists withdraw data.
 func (b *binance) WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error) {
 	return b.Service.WithdrawHistory(hr)
+}
+
+// TradeFee represents trades fees response.
+type TradeFee struct {
+	Fees    Fees   `json:"tradeFee"`
+	Success bool   `json:"success"`
+	Msg     string `json:"msg,omitempty"`
+}
+
+// Fees represents trades fees.
+type Fees struct {
+	Symbol string  `json:"symbol"`
+	Taker  float64 `json:"taker"`
+	Maker  float64 `json:"maker"`
+}
+
+// TradeFee lists of fees.
+func (b *binance) TradeFee(tfr TradeFeeRequest) (*TradeFee, error) {
+	return b.Service.TradeFee(tfr)
 }
 
 // Stream represents stream information.
