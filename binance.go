@@ -524,7 +524,7 @@ func (b *binance) WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error) {
 
 // TradeFee represents trades fees response.
 type TradeFee struct {
-	Fees    Fees   `json:"tradeFee"`
+	Fees    []Fees `json:"tradeFee"`
 	Success bool   `json:"success"`
 	Msg     string `json:"msg,omitempty"`
 }
