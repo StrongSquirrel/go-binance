@@ -27,4 +27,5 @@ type TimeInForce string
 var (
 	GTC = TimeInForce("GTC")
 	IOC = TimeInForce("IOC")
+	FOK = TimeInForce("FOK")
 )
