@@ -272,12 +272,29 @@ type NewOrderRequest struct {
 	Timestamp        time.Time
 }
 
+// ProcessedOrderFill represents order trade item.
+type ProcessedOrderFill struct {
+	Price           float64
+	Qty             float64
+	Commission      float64
+	CommissionAsset string
+}
+
 // ProcessedOrder represents data from processed order.
 type ProcessedOrder struct {
-	Symbol        string
-	OrderID       int64
-	ClientOrderID string
-	TransactTime  time.Time
+	Symbol              string
+	OrderID             int64
+	ClientOrderID       string
+	TransactTime        time.Time
+	Price               float64
+	OrigQty             float64
+	ExecutedQty         float64
+	CummulativeQuoteQty float64
+	Status              OrderStatus
+	TimeInForce         TimeInForce
+	Type                OrderType
+	Side                OrderSide
+	Fills               []ProcessedOrderFill
 }
 
 // NewOrder places new order and returns ProcessedOrder.
