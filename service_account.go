@@ -24,6 +24,27 @@ type rawExecutedOrder struct {
 	Time          float64 `json:"time"`
 }
 
+type rawProcessedOrder struct {
+	Symbol              string  `json:"symbol"`
+	OrderID             int64   `json:"orderId"`
+	ClientOrderID       string  `json:"clientOrderId"`
+	TransactTime        float64 `json:"transactTime"`
+	Price               string  `json:"price"`
+	OrigQty             string  `json:"origQty"`
+	ExecutedQty         string  `json:"executedQty"`
+	CummulativeQuoteQty string  `json:"cummulativeQuoteQty"`
+	Status              string  `json:"status"`
+	TimeInForce         string  `json:"timeInForce"`
+	Type                string  `json:"type"`
+	Side                string  `json:"side"`
+	Fills               []struct {
+		Price           string `json:"price"`
+		Qty             string `json:"qty"`
+		Commission      string `json:"commission"`
+		CommissionAsset string `json:"commissionAsset"`
+	} `json:"fills"`
+}
+
 func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 	params := make(map[string]string)
 	params["symbol"] = or.Symbol
@@ -57,27 +78,12 @@ func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 		return nil, as.handleError(textRes)
 	}
 
-	rawOrder := struct {
-		Symbol        string  `json:"symbol"`
-		OrderID       int64   `json:"orderId"`
-		ClientOrderID string  `json:"clientOrderId"`
-		TransactTime  float64 `json:"transactTime"`
-	}{}
-	if err := json.Unmarshal(textRes, &rawOrder); err != nil {
+	rawOrder := new(rawProcessedOrder)
+	if err := json.Unmarshal(textRes, rawOrder); err != nil {
 		return nil, errors.Wrap(err, "rawOrder unmarshal failed")
 	}
 
-	t, err := timeFromUnixTimestampFloat(rawOrder.TransactTime)
-	if err != nil {
-		return nil, err
-	}
-
-	return &ProcessedOrder{
-		Symbol:        rawOrder.Symbol,
-		OrderID:       rawOrder.OrderID,
-		ClientOrderID: rawOrder.ClientOrderID,
-		TransactTime:  t,
-	}, nil
+	return processedOrderFromRaw(rawOrder)
 }
 
 func (as *apiService) NewOrderTest(or NewOrderRequest) error {
@@ -678,6 +684,64 @@ func (as *apiService) TradeFee(tfr TradeFeeRequest) (*TradeFee, error) {
 	}
 
 	return &tradeFee, nil
+}
+
+func processedOrderFromRaw(reo *rawProcessedOrder) (*ProcessedOrder, error) {
+	price, err := strconv.ParseFloat(reo.Price, 64)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot parse Order.CloseTime")
+	}
+	origQty, err := strconv.ParseFloat(reo.OrigQty, 64)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot parse Order.OrigQty")
+	}
+	execQty, err := strconv.ParseFloat(reo.ExecutedQty, 64)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot parse Order.ExecutedQty")
+	}
+	cummulativeQuoteQty, err := strconv.ParseFloat(reo.CummulativeQuoteQty, 64)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot parse Order.CummulativeQuoteQty")
+	}
+	t, err := timeFromUnixTimestampFloat(reo.TransactTime)
+	if err != nil {
+		return nil, err
+	}
+
+	fills := make([]ProcessedOrderFill, len(reo.Fills))
+	for i, fill := range reo.Fills {
+		fills[i] = ProcessedOrderFill{
+			CommissionAsset: fill.CommissionAsset,
+		}
+		fills[i].Price, err = strconv.ParseFloat(fill.Price, 64)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot parse fill.Price at index: %d", i)
+		}
+		fills[i].Qty, err = strconv.ParseFloat(fill.Qty, 64)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot parse fill.Qty at index: %d", i)
+		}
+		fills[i].Commission, err = strconv.ParseFloat(fill.Commission, 64)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot parse fill.Qty at index: %d", i)
+		}
+	}
+
+	return &ProcessedOrder{
+		Symbol:              reo.Symbol,
+		OrderID:             reo.OrderID,
+		ClientOrderID:       reo.ClientOrderID,
+		TransactTime:        t,
+		Price:               price,
+		OrigQty:             origQty,
+		ExecutedQty:         execQty,
+		CummulativeQuoteQty: cummulativeQuoteQty,
+		Status:              OrderStatus(reo.Status),
+		TimeInForce:         TimeInForce(reo.TimeInForce),
+		Type:                OrderType(reo.Type),
+		Side:                OrderSide(reo.Side),
+		Fills:               fills,
+	}, nil
 }
 
 func executedOrderFromRaw(reo *rawExecutedOrder) (*ExecutedOrder, error) {
