@@ -434,8 +434,10 @@ type MyTradesRequest struct {
 // Trade represents data about trade.
 type Trade struct {
 	ID              int64
+	OrderID         int64
 	Price           float64
 	Qty             float64
+	QuoteQty        float64
 	Commission      float64
 	CommissionAsset string
 	Time            time.Time

@@ -391,8 +391,10 @@ func (as *apiService) MyTrades(mtr MyTradesRequest) ([]*Trade, error) {
 
 	rawTrades := []struct {
 		ID              int64   `json:"id"`
+		OrderID         int64   `json:"orderId"`
 		Price           string  `json:"price"`
 		Qty             string  `json:"qty"`
+		QuoteQty        string  `json:"quoteQty"`
 		Commission      string  `json:"commission"`
 		CommissionAsset string  `json:"commissionAsset"`
 		Time            float64 `json:"time"`
@@ -414,6 +416,10 @@ func (as *apiService) MyTrades(mtr MyTradesRequest) ([]*Trade, error) {
 		if err != nil {
 			return nil, err
 		}
+		quoteQty, err := floatFromString(rt.QuoteQty)
+		if err != nil {
+			return nil, err
+		}
 		commission, err := floatFromString(rt.Commission)
 		if err != nil {
 			return nil, err
@@ -424,8 +430,10 @@ func (as *apiService) MyTrades(mtr MyTradesRequest) ([]*Trade, error) {
 		}
 		tc = append(tc, &Trade{
 			ID:              rt.ID,
+			OrderID:         rt.OrderID,
 			Price:           price,
 			Qty:             qty,
+			QuoteQty:        quoteQty,
 			Commission:      commission,
 			CommissionAsset: rt.CommissionAsset,
 			Time:            t,
