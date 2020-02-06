@@ -369,7 +369,7 @@ func (as *apiService) MyTrades(mtr MyTradesRequest) ([]*Trade, error) {
 		params["recvWindow"] = strconv.FormatInt(recvWindow(mtr.RecvWindow), 10)
 	}
 	if mtr.FromID != 0 {
-		params["orderId"] = strconv.FormatInt(mtr.FromID, 10)
+		params["fromId"] = strconv.FormatInt(mtr.FromID, 10)
 	}
 	if mtr.Limit != 0 {
 		params["limit"] = strconv.Itoa(mtr.Limit)
