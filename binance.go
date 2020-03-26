@@ -465,6 +465,7 @@ type WithdrawRequest struct {
 type WithdrawResult struct {
 	Success bool
 	Msg     string
+	ID      string
 }
 
 // Withdraw executes withdrawal.
