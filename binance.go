@@ -529,6 +529,7 @@ func (b *binance) DepositAddress(ar AddressRequest) (*Address, error) {
 
 // Withdrawal represents withdrawal data.
 type Withdrawal struct {
+	ID        string
 	Amount    float64
 	Address   string
 	TxID      string
