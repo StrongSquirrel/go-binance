@@ -475,6 +475,7 @@ func (as *apiService) Withdraw(wr WithdrawRequest) (*WithdrawResult, error) {
 	rawResult := struct {
 		Msg     string `json:"msg"`
 		Success bool   `json:"success"`
+		ID      string `json:"id"`
 	}{}
 	if err := json.Unmarshal(textRes, &rawResult); err != nil {
 		return nil, errors.Wrap(err, "rawTrades unmarshal failed")
@@ -483,6 +484,7 @@ func (as *apiService) Withdraw(wr WithdrawRequest) (*WithdrawResult, error) {
 	return &WithdrawResult{
 		Msg:     rawResult.Msg,
 		Success: rawResult.Success,
+		ID:      rawResult.ID,
 	}, nil
 }
 
